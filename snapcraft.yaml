@@ -1423,12 +1423,12 @@ parts:
       - -Doptimization=3
       - -Ddebug=true
 
-  mock-bwrap:
-    plugin: dump
-    source: tools/bwrap_mock.sh
-    source-type: file
-    organize:
-      bwrap_mock.sh: usr/bin/
+  # mock-bwrap:
+  #   plugin: dump
+  #   source: tools/bwrap_mock.sh
+  #   source-type: file
+  #   organize:
+  #     bwrap_mock.sh: usr/bin/
 
   glycin:
     after: [ jpeg-xl, heif, meson-deps ]
