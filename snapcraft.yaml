@@ -381,7 +381,7 @@ parts:
       # cargo version in .deb is too old
       curl https://sh.rustup.rs -sSf > cargo.sh
       sh ./cargo.sh -y
-      export PATH=$PATH:$HOME/.cargo/bin
+      export PATH=$HOME/.cargo/bin:$PATH
       ~/.cargo/bin/cargo install cargo-c --locked
       cp ~/.cargo/bin/* /usr/local/bin
     override-stage: |
