@@ -262,6 +262,9 @@ parts:
     source-tag: '2.60.4'
     source-depth: 1
     plugin: meson
+# ext:updatesnap
+#   version-format:
+#     ignore-odd-minor: true
     meson-parameters:
       - --prefix=/usr
       - -Doptimization=3
