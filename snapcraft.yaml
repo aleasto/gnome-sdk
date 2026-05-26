@@ -1452,7 +1452,8 @@ parts:
       find . -type f,l -exec rm -fv $CRAFT_PART_INSTALL/usr/lib/{} \;
       find . -type f,l -name "*.so.*" -exec sh -c "rm -fv $CRAFT_PART_INSTALL/usr/lib/{}*" \;
     stage:
-      - -usr/bin/fc-cache
+# needed to avoid clashing with fontconfig
+      - -etc/fonts/fonts.conf
 
   conditioning:
     after:
