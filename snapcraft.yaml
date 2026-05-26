@@ -119,8 +119,6 @@ parts:
     override-pull: |
       craftctl default
       patch -p1 < $CRAFT_PROJECT_DIR/patches/fontconfig-delay.patch
-    stage:
-      - usr/bin/fc-cache
 
   libffi:
     after: [ libtool ]
@@ -185,7 +183,7 @@ parts:
     build-environment: *buildenv
 
   cairo:
-    after: [ pixman, meson-deps ]
+    after: [ fontconfig, pixman, meson-deps ]
     source: https://gitlab.freedesktop.org/cairo/cairo.git
     source-tag: '1.18.4'
 # ext:updatesnap
