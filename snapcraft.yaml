@@ -56,7 +56,7 @@ parts:
     after: [ python-build-deps ]
     plugin: nil
     source: https://github.com/ninja-build/ninja.git
-    source-tag: 'v1.12.1'
+    source-tag: 'v1.13.2'
     source-depth: 1
     override-build: |
       rm -rf build
@@ -75,7 +75,7 @@ parts:
     after: [ ninja ]
     plugin: nil
     source: https://github.com/mesonbuild/meson.git
-    source-tag: '1.8.4'
+    source-tag: '1.11.1'
     source-depth: 1
     override-build: |
       python3 -m pip install --prefix=$CRAFT_PART_INSTALL/usr --break-system-packages .
@@ -109,7 +109,7 @@ parts:
   fontconfig:
     after: [ libtool, meson-deps ]
     source: https://gitlab.freedesktop.org/fontconfig/fontconfig.git
-    source-tag: 2.15.0
+    source-tag: 2.18.0
     source-depth: 1
     plugin: meson
     meson-parameters:
@@ -205,7 +205,6 @@ parts:
       - -Dtests=disabled
     build-environment: *buildenv
     build-packages:
-      - libfontconfig1-dev
       - libfreetype-dev
       - libx11-dev
       - libxext-dev
@@ -246,7 +245,7 @@ parts:
   vala:
     after: [ gobject-introspection ]
     source: https://gitlab.gnome.org/GNOME/vala.git
-    source-tag: '0.56.18'
+    source-tag: '0.56.19'
     source-depth: 1
 # ext:updatesnap
 #   version-format:
@@ -262,11 +261,7 @@ parts:
   at-spi2-core:
     after: [ glib, gobject-introspection, meson-deps ]
     source: https://gitlab.gnome.org/GNOME/at-spi2-core.git
-    source-tag: 'AT_SPI2_CORE_2_52_0'
-# ext:updatesnap
-#   version-format:
-#     format: 'AT_SPI2_CORE_%M_%m_%R'
-#     lower-than: 2.53
+    source-tag: '2.60.4'
     source-depth: 1
     plugin: meson
     meson-parameters:
@@ -297,7 +292,7 @@ parts:
   harfbuzz:
     after: [ fribidi, meson-deps, gobject-introspection ]
     source: https://github.com/harfbuzz/harfbuzz.git
-    source-tag: '11.4.5' # developers declared that they won't break ABI
+    source-tag: '14.2.0' # developers declared that they won't break ABI
     source-depth: 1
     plugin: meson
     meson-parameters:
@@ -327,7 +322,7 @@ parts:
   pango:
     after: [ libffi, harfbuzz, meson-deps, gobject-introspection ]
     source: https://gitlab.gnome.org/GNOME/pango.git
-    source-tag: '1.56.4'
+    source-tag: '1.57.1'
     source-depth: 1
     plugin: meson
     meson-parameters:
@@ -382,7 +377,7 @@ parts:
   librsvg:
     after: [ gdk-pixbuf, vala, meson-deps, gobject-introspection ]
     source: https://gitlab.gnome.org/GNOME/librsvg.git
-    source-tag: '2.61.1' # they left the odd->unstable even->stable scheme, and now all tags are stable
+    source-tag: '2.62.2' # they left the odd->unstable even->stable scheme, and now all tags are stable
 # ext:updatesnap
 #   version-format:
 #     no-9x-revisions: true
@@ -482,7 +477,7 @@ parts:
   libsoup3:
     after: [ libpsl, meson-deps, vala, gobject-introspection ]
     source: https://gitlab.gnome.org/GNOME/libsoup.git
-    source-tag: '3.6.5'
+    source-tag: '3.6.6'
     source-depth: 1
     plugin: meson
     meson-parameters:
@@ -523,7 +518,7 @@ parts:
   wayland-protocols:
     after: [ meson-deps ]
     source: https://gitlab.freedesktop.org/wayland/wayland-protocols.git
-    source-tag: '1.45'
+    source-tag: '1.48'
     source-depth: 1
     build-packages:
       - libwayland-dev
@@ -538,7 +533,7 @@ parts:
   gtk3:
     after: [ wayland-protocols, harfbuzz, pango, meson-deps, gobject-introspection ]
     source: https://gitlab.gnome.org/GNOME/gtk.git
-    source-tag: '3.24.50'
+    source-tag: '3.24.52'
 # ext:updatesnap
 #   version-format:
 #     ignore-odd-minor: true
@@ -585,7 +580,7 @@ parts:
   gtk4:
     after: [ wayland-protocols, harfbuzz, pango, meson-deps, gobject-introspection ]
     source: https://gitlab.gnome.org/GNOME/gtk.git
-    source-tag: '4.18.6'
+    source-tag: '4.22.4'
 # ext:updatesnap
 #   version-format:
 #     ignore-odd-minor: true
@@ -723,7 +718,7 @@ parts:
   glibmm:
     after: [ mm-common ]
     source: https://gitlab.gnome.org/GNOME/glibmm.git
-    source-tag: '2.84.0'
+    source-tag: '2.88.0'
     source-depth: 1
     plugin: autotools
     override-build: |
@@ -753,7 +748,7 @@ parts:
   cairomm:
     after: [ glibmm, meson-deps ]
     source: https://gitlab.freedesktop.org/cairo/cairomm.git
-    source-tag: '1.18.0'
+    source-tag: '1.19.0'
     source-depth: 1
     plugin: meson
     meson-parameters:
@@ -795,7 +790,7 @@ parts:
   atkmm:
     after: [ pangomm ]
     source: https://gitlab.gnome.org/GNOME/atkmm.git
-    source-tag: '2.36.3'
+    source-tag: '2.36.4'
     source-depth: 1
 # ext:updatesnap
 #   version-format:
@@ -818,7 +813,7 @@ parts:
   gtkmm:
     after: [ atkmm, meson-deps ]
     source: https://gitlab.gnome.org/GNOME/gtkmm.git
-    source-tag: '4.18.0'
+    source-tag: '4.22.0'
     source-depth: 1
 # ext:updatesnap
 #   version-format:
@@ -851,7 +846,7 @@ parts:
   gtksourceview:
     after: [ gtkmm, meson-deps, gobject-introspection ]
     source: https://gitlab.gnome.org/GNOME/gtksourceview.git
-    source-tag: '5.16.0'
+    source-tag: '5.20.0'
 # ext:updatesnap
 #   version-format:
 #     ignore-odd-minor: true
@@ -913,7 +908,7 @@ parts:
   gnome-desktop:
     after: [ gsettings-desktop-schemas, meson-deps, gobject-introspection ]
     source: https://gitlab.gnome.org/GNOME/gnome-desktop.git
-    source-tag: '44.4'
+    source-tag: '44.5'
 # ext:updatesnap
 #   version-format:
 #     same-major: true
@@ -937,7 +932,7 @@ parts:
     after: [ gnome-desktop, meson-deps ]
     source: https://github.com/linuxwacom/libwacom
     source-type: git
-    source-tag: 'libwacom-2.16.1'
+    source-tag: 'libwacom-2.18.0'
 # ext:updatesnap
 #   version-format:
 #     format: 'libwacom-%M.%m.%R'
@@ -954,7 +949,7 @@ parts:
   libinput:
     after: [ libwacom, meson-deps ]
     source: https://gitlab.freedesktop.org/libinput/libinput.git
-    source-tag: '1.29.1'
+    source-tag: '1.31.2'
     source-depth: 1
     plugin: meson
     meson-parameters:
@@ -973,7 +968,7 @@ parts:
   pycairo:
     after: [ libinput, meson-deps ]
     source: https://github.com/pygobject/pycairo.git
-    source-tag: 'v1.28.0'
+    source-tag: 'v1.29.0'
     source-depth: 1
     plugin: meson
     meson-parameters:
@@ -986,7 +981,7 @@ parts:
   pygobject:
     after: [ pycairo, meson-deps ]
     source: https://gitlab.gnome.org/GNOME/pygobject.git
-    source-tag: '3.56.2'
+    source-tag: '3.56.3'
     source-depth: 1
     plugin: meson
     meson-parameters:
@@ -1041,7 +1036,7 @@ parts:
   p11-kit:
     after: [ gjs, meson-deps ]
     source: https://github.com/p11-glue/p11-kit.git
-    source-tag: '0.25.9'
+    source-tag: '0.26.2'
     source-depth: 1
     plugin: meson
     meson-parameters:
@@ -1110,10 +1105,22 @@ parts:
     build-packages:
       - libnghttp2-dev
 
-  libgweather:
+  gweather-locations:
     after: [ libgeocode, meson-deps, gobject-introspection, vala ]
+    source: https://github.com/GNOME/gweather-locations.git
+    source-tag: '2026.2'
+    source-depth: 1
+    plugin: meson
+    build-environment: *buildenv
+    meson-parameters:
+      - --prefix=/usr
+      - -Doptimization=3
+      - -Ddebug=true
+
+  libgweather:
+    after: [ gweather-locations, libgeocode, meson-deps, gobject-introspection, vala ]
     source: https://gitlab.gnome.org/GNOME/libgweather.git
-    source-tag: '4.4.4'
+    source-tag: '4.6.0'
 # ext:updatesnap
 #   version-format:
 #     ignore-odd-minor: true
@@ -1127,13 +1134,10 @@ parts:
       - -Dintrospection=true
       - -Dgtk_doc=false
       - -Dtests=false
-      - -Dsoup2=false
       - -Denable_vala=true
     override-pull: |
       craftctl default
       meson subprojects download
-      patch -p1 < $CRAFT_PROJECT_DIR/patches/libgweather.diff
-      sed -i "s#CRAFT_ENV_REPLACE#/usr/lib:/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$CRAFT_STAGE/usr/lib:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR#" $CRAFT_PART_SRC/data/meson.build
     build-packages:
       - gir1.2-glib-2.0
 
@@ -1266,7 +1270,6 @@ parts:
       - mm-common
       - pangomm
       - webp-pixbuf-loader
-      - fontconfig
     plugin: nil
     stage-packages:
       - appstream
@@ -1310,7 +1313,6 @@ parts:
       - libexpat1
       - libexpat1-dev
       - libffi8
-      - libfontconfig1-dev
       - libfreetype6
       - libfreetype-dev
       - libgbm-dev
