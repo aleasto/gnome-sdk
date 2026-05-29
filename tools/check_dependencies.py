@@ -93,6 +93,24 @@ for part_name in data["parts"]:
                         dependency="vala"):
         failed = True
 
+###########################################################
+# Ensure that all parts have build-environment: *buildenv #
+###########################################################
+
+build_exceptions = ['buildenv', 'buildtool', 'python-build-deps', 'ninja', 'meson-deps', 'libtool', 'pangomm', 'atkmm', 'gtkmm', 'debs', 'bindtextdomain', 'cleanup']
+expected_buildenv = data["parts"]["buildenv"]["build-environment"]
+for part_name in data["parts"]:
+    if part_name == "buildenv":
+        continue
+    if part_name in build_exceptions:
+        if "build-environment" in data["parts"][part_name] and data["parts"][part_name]["build-environment"] == expected_buildenv:
+            print(f"Part {part_name} seems to have the same build-environment as buildenv. Please check if it is correct.")
+            failed = True
+        continue
+    if "build-environment" not in data["parts"][part_name] or data["parts"][part_name]["build-environment"] != expected_buildenv:
+        print(f"Part {part_name} must have build-environment: *buildenv")
+        failed = True
+
 if failed:
     sys.exit(1)
 print("All dependencies are correct")
