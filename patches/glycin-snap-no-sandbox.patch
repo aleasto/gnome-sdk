@@ -1,5 +1,16 @@
-diff --git a/glycin/src/api_common.rs b/glycin/src/api_common.rs
-index 77285117..4a35f6d6 100644
+From c04121ddc66944925863367cb25ceb03b48c13f5 Mon Sep 17 00:00:00 2001
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Tue, 7 Jul 2026 12:38:49 +0200
+Subject: [PATCH] glycin: Partially disable sandbox for snap environment
+
+We cannot run bwrap within snap confinement, but we can still set a seccomp
+filter at least.
+---
+ .../missing-sources/glycin/src/api_common.rs  |  1 +
+ debian/missing-sources/glycin/src/sandbox.rs  | 59 ++++++++++++++++++-
+ debian/missing-sources/glycin/src/util.rs     | 26 +++++++-
+ 3 files changed, 82 insertions(+), 4 deletions(-)
+
 --- a/glycin/src/api_common.rs
 +++ b/glycin/src/api_common.rs
 @@ -22,6 +22,7 @@ pub enum SandboxMechanism {
@@ -10,8 +21,6 @@ index 77285117..4a35f6d6 100644
              RunEnvironment::FlatpakDevel => Self::NotSandboxed,
              RunEnvironment::Flatpak => Self::FlatpakSpawn,
              RunEnvironment::Host => Self::Bwrap,
-diff --git a/glycin/src/sandbox.rs b/glycin/src/sandbox.rs
-index 2e6d5a15..592d17e6 100644
 --- a/glycin/src/sandbox.rs
 +++ b/glycin/src/sandbox.rs
 @@ -18,13 +18,22 @@ use nix::libc::siginfo_t;
@@ -54,43 +63,34 @@ index 2e6d5a15..592d17e6 100644
      "madvise",
      "membarrier",
      "memfd_create",
-@@ -170,7 +181,7 @@ const ALLOWED_SYSCALLS_FONTCONFIG: &[&str] = &[
-     "unlinkat",
+@@ -171,6 +182,7 @@ const ALLOWED_SYSCALLS_FONTCONFIG: &[&st
  ];
  
--const INHERITED_ENVIRONMENT_VARIABLES: &[&str] = &["RUST_BACKTRACE", "RUST_LOG", "XDG_RUNTIME_DIR"];
-+const INHERITED_ENVIRONMENT_VARIABLES: &[&str] = &["RUST_BACKTRACE", "RUST_LOG", "XDG_RUNTIME_DIR", "LD_LIBRARY_PATH"];
+ const INHERITED_ENVIRONMENT_VARIABLES: &[&str] = &["RUST_BACKTRACE", "RUST_LOG", "XDG_RUNTIME_DIR"];
++const INHERITED_ENVIRONMENT_VARIABLES_SNAP: &[&str] = &["LD_LIBRARY_PATH"];
  
  pub struct Sandbox {
      sandbox_mechanism: SandboxMechanism,
-@@ -216,6 +227,7 @@ impl Sandbox {
-         let dbus_fd = self.dbus_socket.as_raw_fd();
- 
-         let mut shared_fds = Vec::new();
-+        let run_environment = RunEnvironment::cached().await;
- 
-         let (mut command, seccomp_fd) = match self.sandbox_mechanism {
-             SandboxMechanism::Bwrap => {
 @@ -232,8 +244,16 @@ impl Sandbox {
                  (command, None)
              }
              SandboxMechanism::NotSandboxed => {
 -                eprintln!("WARNING: Glycin running without sandbox.");
 -                let command = self.no_sandbox_command();
-+                let snap_confined = matches!(run_environment, RunEnvironment::Snap);
-+                let command = if snap_confined {
-+                    eprintln!(
-+                        "WARNING: Glycin running without additional sandbox inside snap confinement.",
-+                    );
-+                    self.snap_command()?
-+                } else {
-+                    eprintln!("WARNING: Glycin running without sandbox.");
-+                    self.no_sandbox_command()
++                let command = match RunEnvironment::cached().await {
++                    RunEnvironment::Snap => {
++                        eprintln!("WARNING: Glycin running without additional sandbox inside snap confinement.");
++                        self.snap_command()?
++                    }
++                    _ => {
++                        eprintln!("WARNING: Glycin running without sandbox.");
++                        self.no_sandbox_command()
++                    }
 +                };
  
                  (command, None)
              }
-@@ -560,6 +580,34 @@ impl Sandbox {
+@@ -560,6 +580,39 @@ impl Sandbox {
          command
      }
  
@@ -99,6 +99,11 @@ index 2e6d5a15..592d17e6 100644
 +
 +        command.env_clear();
 +        for key in INHERITED_ENVIRONMENT_VARIABLES {
++            if let Some(val) = std::env::var_os(key) {
++                command.env(key, val);
++            }
++        }
++        for key in INHERITED_ENVIRONMENT_VARIABLES_SNAP {
 +            if let Some(val) = std::env::var_os(key) {
 +                command.env(key, val);
 +            }
@@ -125,8 +130,6 @@ index 2e6d5a15..592d17e6 100644
      /// Memory limit in bytes that should be applied to sandboxes
      fn memory_limit() -> resource::rlim_t {
          // Lookup free memory
-diff --git a/glycin/src/util.rs b/glycin/src/util.rs
-index 765a5953..df48aede 100644
 --- a/glycin/src/util.rs
 +++ b/glycin/src/util.rs
 @@ -71,6 +71,8 @@ pub enum RunEnvironment {
@@ -143,38 +146,18 @@ index 765a5953..df48aede 100644
              result
          } else {
 -            let run_env = if let Some(devel) = flatpak_devel().await {
-+            let run_env = if snap_confined().await {
++            let run_env = if snap_confined() {
 +                Self::Snap
 +            } else if let Some(devel) = flatpak_devel().await {
                  if devel {
                      Self::FlatpakDevel
                  } else {
-@@ -104,6 +108,30 @@ impl RunEnvironment {
+@@ -104,6 +108,10 @@ impl RunEnvironment {
      }
  }
  
-+async fn snap_confined() -> bool {
-+    if let Ok(apparmor_label) = read("/proc/self/attr/current").await
-+        && snap_apparmor_label(&apparmor_label)
-+    {
-+        return true;
-+    }
-+
-+    std::env::var_os("SNAP").is_some() || std::env::var_os("SNAP_NAME").is_some()
-+}
-+
-+fn snap_apparmor_label(label: &[u8]) -> bool {
-+    let label = String::from_utf8_lossy(label);
-+    let label = label.trim_matches(char::from(0)).trim();
-+
-+    if label == "unconfined" {
-+        return false;
-+    }
-+
-+    label
-+        .split_ascii_whitespace()
-+        .next()
-+        .is_some_and(|profile| profile.starts_with("snap."))
++fn snap_confined() -> bool {
++    std::env::var_os("SNAP").is_some_and(|val| !val.is_empty())
 +}
 +
  /// Returns None if not in Flatpak environment, otherwise true if development
